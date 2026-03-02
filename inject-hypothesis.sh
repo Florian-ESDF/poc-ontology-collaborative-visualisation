@@ -4,6 +4,15 @@
 
 set -euo pipefail
 
+# Portable in-place sed (GNU sed vs BSD/macOS sed)
+sedi() {
+  if sed --version 2>/dev/null | grep -q GNU; then
+    sed -i "$@"
+  else
+    sed -i '' "$@"
+  fi
+}
+
 OUTPUT_DIR="${1:-output}"
 
 if [ ! -d "$OUTPUT_DIR" ]; then
@@ -24,9 +33,9 @@ fi
 count=0
 for f in $html_files; do
   # Remove any existing hypothes.is script tags (idempotent)
-  sed -i '' 's|<script src="https://hypothes.is/embed.js"[^>]*></script>||g' "$f"
+  sedi 's|<script src="https://hypothes.is/embed.js"[^>]*></script>||g' "$f"
   # Inject before </head>
-  sed -i '' "s|</head>|${HYPOTHESIS_TAG}</head>|" "$f"
+  sedi "s|</head>|${HYPOTHESIS_TAG}</head>|" "$f"
   count=$((count + 1))
 done
 
