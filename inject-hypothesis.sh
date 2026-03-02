@@ -24,9 +24,9 @@ fi
 count=0
 for f in $html_files; do
   # Remove any existing hypothes.is script tags (idempotent)
-  sed -i 's|<script src="https://hypothes.is/embed.js"[^>]*></script>||g' "$f"
+  sed -i '' 's|<script src="https://hypothes.is/embed.js"[^>]*></script>||g' "$f"
   # Inject before </head>
-  sed -i "s|</head>|${HYPOTHESIS_TAG}\n</head>|" "$f"
+  sed -i '' "s|</head>|${HYPOTHESIS_TAG}</head>|" "$f"
   count=$((count + 1))
 done
 

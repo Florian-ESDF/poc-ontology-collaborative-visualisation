@@ -16,6 +16,22 @@ WIDOCO_JAR="widoco.jar"
 OUTPUT_DIR="output"
 PORT="${1:-8080}"
 
+# --- Step 0: Ensure Java is installed ---
+echo "==> Step 0: Checking Java..."
+if ! java -version &>/dev/null; then
+  echo "    Java not found. Installing via Homebrew..."
+  if ! command -v brew &>/dev/null; then
+    echo "ERROR: Homebrew is required to install Java. Install it from https://brew.sh" >&2
+    exit 1
+  fi
+  brew install openjdk
+  # Link so that system java wrappers find it
+  sudo ln -sfn "$(brew --prefix openjdk)/libexec/openjdk.jdk" /Library/Java/JavaVirtualMachines/openjdk.jdk
+  echo "    Java installed."
+else
+  echo "    Java found: $(java -version 2>&1 | head -1 | tr -d '\n')"
+fi
+
 # --- Step 1: Download the Wine ontology ---
 echo "==> Step 1: Downloading Wine ontology..."
 mkdir -p "$ONTOLOGY_DIR"
@@ -41,10 +57,10 @@ echo "==> Step 3: Running Widoco..."
 java -jar "$WIDOCO_JAR" \
   -ontFile "$ONTOLOGY_FILE" \
   -outFolder "$OUTPUT_DIR" \
+  -confFile config/config.properties \
   -uniteSections \
   -lang en \
   -rewriteAll \
-  -getOntologyMetadata \
   -noPlaceHolderText
 
 echo "    Widoco output written to $OUTPUT_DIR/"
